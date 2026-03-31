@@ -516,11 +516,11 @@ footer {
   transition: transform 0.3s ease, border-color 0.3s ease;
   cursor: pointer;
 }
-.film-frame video {
+.film-frame iframe {
   width: 100%;
   height: 100%;
-  object-fit: cover;
-  pointer-events: none;
+  pointer-events: none; /* Essential: lets the parent div handle the hover */
+  transform: scale(1.35); /* Crops out default YouTube black bars on Shorts */
 }
 .film-frame:hover {
   transform: scale(1.08);

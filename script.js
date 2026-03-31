@@ -175,16 +175,35 @@ function showYtFallback() {
     </div>`;
 }
 
-/* ── Film Strip Interactive Unmute ── */
-document.addEventListener('DOMContentLoaded', () => {
-  const filmFrames = document.querySelectorAll('.film-frame');
-  filmFrames.forEach(frame => {
-    const video = frame.querySelector('video');
-    frame.addEventListener('mouseenter', () => {
-      if(video) video.muted = false;
-    });
-    frame.addEventListener('mouseleave', () => {
-      if(video) video.muted = true;
+/* ── Film Strip YouTube API Embeds ── */
+// Load YouTube IFrame Player API
+const tag = document.createElement('script');
+tag.src = "https://www.youtube.com/iframe_api";
+const firstScriptTag = document.getElementsByTagName('script')[0];
+firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+
+// Initialize players once API is ready
+window.onYouTubeIframeAPIReady = function() {
+  const frames = document.querySelectorAll('.film-frame');
+  frames.forEach((frame) => {
+    const playerDiv = frame.querySelector('.yt-player');
+    if (!playerDiv) return;
+    
+    const videoId = playerDiv.getAttribute('data-video-id');
+    const player = new YT.Player(playerDiv, {
+      videoId: videoId,
+      playerVars: {
+        'autoplay': 1, 'controls': 0, 'mute': 1, 'loop': 1, 
+        'playlist': videoId, 'playsinline': 1, 'rel': 0, 'modestbranding': 1
+      },
+      events: {
+        'onReady': (event) => {
+          event.target.playVideo();
+          // Attach hover events directly to the frame wrapper once player is loaded
+          frame.addEventListener('mouseenter', () => event.target.unMute());
+          frame.addEventListener('mouseleave', () => event.target.mute());
+        }
+      }
     });
   });
-});
+};
