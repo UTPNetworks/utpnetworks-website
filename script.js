@@ -174,3 +174,17 @@ function showYtFallback() {
       </a>
     </div>`;
 }
+
+/* ── Film Strip Interactive Unmute ── */
+document.addEventListener('DOMContentLoaded', () => {
+  const filmFrames = document.querySelectorAll('.film-frame');
+  filmFrames.forEach(frame => {
+    const video = frame.querySelector('video');
+    frame.addEventListener('mouseenter', () => {
+      if(video) video.muted = false;
+    });
+    frame.addEventListener('mouseleave', () => {
+      if(video) video.muted = true;
+    });
+  });
+});
