@@ -176,13 +176,11 @@ function showYtFallback() {
 }
 
 /* ── Film Strip YouTube API Embeds ── */
-// Load YouTube IFrame Player API
 const tag = document.createElement('script');
 tag.src = "https://www.youtube.com/iframe_api";
 const firstScriptTag = document.getElementsByTagName('script')[0];
 firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
 
-// Initialize players once API is ready
 window.onYouTubeIframeAPIReady = function() {
   const frames = document.querySelectorAll('.film-frame');
   frames.forEach((frame) => {
@@ -194,14 +192,28 @@ window.onYouTubeIframeAPIReady = function() {
       videoId: videoId,
       playerVars: {
         'autoplay': 1, 'controls': 0, 'mute': 1, 'loop': 1, 
-        'playlist': videoId, 'playsinline': 1, 'rel': 0, 'modestbranding': 1
+        'playlist': videoId, 'playsinline': 1, 'rel': 0, 'modestbranding': 1,
+        'showinfo': 0, 'iv_load_policy': 3
       },
       events: {
         'onReady': (event) => {
+          // Ensure it's playing but muted initially
+          event.target.mute();
           event.target.playVideo();
-          // Attach hover events directly to the frame wrapper once player is loaded
-          frame.addEventListener('mouseenter', () => event.target.unMute());
-          frame.addEventListener('mouseleave', () => event.target.mute());
+          
+          frame.addEventListener('mouseenter', () => {
+            try {
+              event.target.unMute();
+              event.target.playVideo();
+            } catch (e) {
+              console.log("Autoplay policy might be blocking unmute", e);
+            }
+          });
+          
+          frame.addEventListener('mouseleave', () => {
+            event.target.mute();
+            event.target.pauseVideo();
+          });
         }
       }
     });

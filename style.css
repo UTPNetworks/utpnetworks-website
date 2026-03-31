@@ -488,24 +488,25 @@ footer {
 }
 
 .utp-film-strip-wrapper {
-  width: 50%;
+  width: 80%;
   margin: 40px auto;
   overflow: hidden;
   background-color: #0a0a0a;
-  padding: 10px 0;
+  padding: 15px 0;
   position: relative;
-  border-top: 5px dashed #fff; 
-  border-bottom: 5px dashed #fff;
+  border-top: 6px dashed #fff; 
+  border-bottom: 6px dashed #fff;
+  height: auto; /* Lock vertical scale by fixing frame height */
 }
 @media (max-width: 900px) {
   .utp-film-strip-wrapper {
-    width: 100%;
-    margin: 40px 0;
+    width: 95%; /* Better fit for mobile */
+    margin: 30px auto;
   }
 }
 .utp-film-track {
   display: flex;
-  gap: 8px;
+  gap: 12px;
   width: max-content;
   animation: scrollFilm 30s linear infinite; 
 }
@@ -513,11 +514,11 @@ footer {
   animation-play-state: paused;
 }
 .film-frame {
-  width: 125px; /* 50% of 250px */
-  aspect-ratio: 9 / 16;
+  width: 180px; /* Adjusted for 80% view */
+  height: 320px; /* Explicit height lock (9:16 ratio) */
   background: #000;
-  border: 2px solid #222;
-  border-radius: 4px;
+  border: 3px solid #222;
+  border-radius: 6px;
   overflow: hidden;
   transition: transform 0.3s ease, border-color 0.3s ease;
   cursor: pointer;
