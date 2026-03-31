@@ -175,20 +175,64 @@ function showYtFallback() {
     </div>`;
 }
 
-/* ── Film Strip YouTube API Embeds ── */
-const tag = document.createElement('script');
-tag.src = "https://www.youtube.com/iframe_api";
-const firstScriptTag = document.getElementsByTagName('script')[0];
-firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+/* ── Film Strip: Dynamic YouTube Marquee ── */
+const YOUTUBE_API_KEY = 'YOUR_YOUTUBE_API_KEY'; // Placeholder
+const CHANNEL_ID = 'UCp8BLYf-hTUwhH4TZfUDE_A';
+
+async function fetchYouTubeVideos() {
+  const track = document.getElementById('dynamicFilmTrack');
+  if (!track) return;
+
+  try {
+    const uploadsPlaylistId = CHANNEL_ID.replace('UC', 'UU');
+    const response = await fetch(`https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&maxResults=10&playlistId=${uploadsPlaylistId}&key=${YOUTUBE_API_KEY}`);
+    const data = await response.json();
+
+    if (data.items) {
+      renderMarquee(data.items);
+    } else {
+      throw new Error("No items found");
+    }
+  } catch (error) {
+    console.error("YouTube API failed, using fallback:", error);
+    const fallbackIds = ['zBph9KWybPg', '45S_cOmmw20', 'qMv1-B_WkGE', '0N8f_F5fT5Q'];
+    const fallbackItems = fallbackIds.map(id => ({ snippet: { resourceId: { videoId: id } } }));
+    renderMarquee(fallbackItems);
+  }
+}
+
+function renderMarquee(items) {
+  const track = document.getElementById('dynamicFilmTrack');
+  const allItems = [...items, ...items]; 
+  
+  track.innerHTML = allItems.map(item => `
+    <div class="film-frame">
+      <div class="yt-player" data-video-id="${item.snippet.resourceId.videoId}"></div>
+    </div>
+  `).join('');
+
+  initYouTubePlayers();
+}
+
+function initYouTubePlayers() {
+  if (typeof YT === 'undefined' || !YT.Player) {
+    const tag = document.createElement('script');
+    tag.src = "https://www.youtube.com/iframe_api";
+    const firstScriptTag = document.getElementsByTagName('script')[0];
+    firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+  } else {
+    onYouTubeIframeAPIReady();
+  }
+}
 
 window.onYouTubeIframeAPIReady = function() {
   const frames = document.querySelectorAll('.film-frame');
   frames.forEach((frame) => {
     const playerDiv = frame.querySelector('.yt-player');
-    if (!playerDiv) return;
+    if (!playerDiv || playerDiv.tagName === 'IFRAME') return;
     
     const videoId = playerDiv.getAttribute('data-video-id');
-    const player = new YT.Player(playerDiv, {
+    new YT.Player(playerDiv, {
       videoId: videoId,
       playerVars: {
         'autoplay': 1, 'controls': 0, 'mute': 1, 'loop': 1, 
@@ -197,7 +241,6 @@ window.onYouTubeIframeAPIReady = function() {
       },
       events: {
         'onReady': (event) => {
-          // Ensure it's playing but muted initially
           event.target.mute();
           event.target.playVideo();
           
@@ -205,9 +248,7 @@ window.onYouTubeIframeAPIReady = function() {
             try {
               event.target.unMute();
               event.target.playVideo();
-            } catch (e) {
-              console.log("Autoplay policy might be blocking unmute", e);
-            }
+            } catch (e) {}
           });
           
           frame.addEventListener('mouseleave', () => {
@@ -219,3 +260,8 @@ window.onYouTubeIframeAPIReady = function() {
     });
   });
 };
+
+// Initialize
+document.addEventListener('DOMContentLoaded', () => {
+  fetchYouTubeVideos();
+});
